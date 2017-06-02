@@ -67,6 +67,17 @@ class S3_PostMeta_Patch {
         }, $content);
     }
 
+    public function get_s3_client() {
+	    return $this->get_s3_instance()->get_s3client(
+	        $this->get_s3_instance()->get_setting('region')
+	    );
+    }
+
+    public function get_s3_instance() {
+        global $as3cf;
+	    return $as3cf;
+    }
+
 }
 
 $s3_postmeta_patch = new S3_PostMeta_Patch();
