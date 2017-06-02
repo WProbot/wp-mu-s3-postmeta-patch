@@ -28,7 +28,7 @@ class S3_PostMeta_Patch {
             'acl'    => \Amazon_S3_And_CloudFront::DEFAULT_ACL
         ];
 
-        if (!get_s3_client()->doesObjectExist($s3object['bucket'], $s3object['key'])) {
+        if (!$this->get_s3_client()->doesObjectExist($s3object['bucket'], $s3object['key'])) {
             return $meta;
         }
 
@@ -51,7 +51,7 @@ class S3_PostMeta_Patch {
          */
         global $as3cf;
 
-        $s3Client = get_s3_client();
+        $s3Client = $this->get_s3_client();
         $bucket = $as3cf->get_setting('bucket');
 
         return preg_replace_callback('/(["\'])\/?(data\/uploads[^\\1]*?)\\1/i', function($match) use ($s3Client, $bucket) {
