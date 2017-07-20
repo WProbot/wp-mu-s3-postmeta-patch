@@ -2,53 +2,61 @@
 
 defined( 'ABSPATH' ) || exit;
 
-class S3_PostMeta_Patch {
+/**
+ * S3PostMetaPatch
+ */
+class S3PostMetaPatch {
 
     public function __construct() {
-        add_filter( 'as3cf_get_attachment_s3_info', array( $this, 'amazonS3_info_upload' ), 10, 2 );
-        add_filter( 'content_edit_pre', array( $this, 'amazonS3_content_edit' ), 10, 2 );
+        add_filter( 'as3cf_get_attachment_s3_info', array( &$this, 'amazonS3_info_upload' ), 10, 2 );
+        add_filter( 'content_edit_pre', array( &$this, 'amazonS3_content_edit' ), 10, 2 );
+
+        add_action( 'aws_init', array( &$this, 'aws_init' ), 20 );
     }
 
-    public function amazonS3_info_upload( $meta, $postId ) {
-        if (is_array($meta)) {
-            return $meta;
-        }
-
-        /**
-         * @var $as3cf \Amazon_S3_And_CloudFront
-         */
+    public function aws_init() {
         global $as3cf;
 
-        $file = get_post_meta($postId, '_wp_attached_file', true);
+        remove_filter( 'wp_calculate_image_srcset', [$as3cf->plugin_compat, 'wp_calculate_image_srcset'] );
+        remove_filter( 'wp_get_attachment_url', [$as3cf, 'wp_get_attachment_url'], 99 );
+        remove_filter( 'the_content', [$as3cf->filter_local, 'filter_post'], 100 );
+        remove_filter( 'the_excerpt', [$as3cf->filter_local, 'filter_post'], 100 );
+    }
 
-        $s3object = [
+    public function amazonS3_info_upload( $post_meta, $post_id ) {
+        if ( is_array( $post_meta ) ) {
+            return $post_meta;
+        }
+        
+        global $as3cf;
+
+        $file = get_post_meta( $post_id, '_wp_attached_file', true );
+
+        $s3_object = [
             'bucket' => $as3cf->get_setting('bucket'),
             'key'    => $as3cf->get_object_prefix() . $file,
             'region' => $as3cf->get_setting('region'),
             'acl'    => \Amazon_S3_And_CloudFront::DEFAULT_ACL
         ];
 
-        if (!$this->get_s3_client()->doesObjectExist($s3object['bucket'], $s3object['key'])) {
-            return $meta;
+        if ( ! $this->get_s3_client()->doesObjectExist( $s3_object['bucket'], $s3_object['key'] ) ) {
+            return $post_meta;
         }
 
-        $result = update_post_meta($postId, 'amazonS3_info', $s3object);
+        $result = update_post_meta( $post_id, 'amazonS3_info', $s3_object );
 
-        if ($result === false) {
-            return $meta;
+        if ( $result === false ) {
+            return $post_meta;
         }
 
-        return $s3object;
+        return $s3_object;
     }
 
     public function amazonS3_content_edit( $content ) {
-        if (empty($content)) {
+        if ( empty( $content ) ) {
             return $content;
         }
 
-        /**
-         * @var $as3cf \Amazon_S3_And_CloudFront
-         */
         global $as3cf;
 
         $s3Client = $this->get_s3_client();
@@ -80,4 +88,4 @@ class S3_PostMeta_Patch {
 
 }
 
-$s3_postmeta_patch = new S3_PostMeta_Patch();
+$s3_postmeta_patch = new S3PostMetaPatch();
