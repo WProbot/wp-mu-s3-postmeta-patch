@@ -1,5 +1,5 @@
 {
-  "name": "muplugin/s3-postmeta-patch",
+  "name": "axelspringer/wp-mu-s3-postmeta-patch",
   "type": "wordpress-muplugin",
   "description": "Images that are not uploaded over the wordpress backend don't have a 'amazonS3_info' entry in the database. We have to make sure, this info exists. Otherwise we are running into unexpected side effects.(e.g. images are not displayed properly in the text-editor)",
   "keywords": [
@@ -10,11 +10,15 @@
     {
       "name": "Stefan Schwager",
       "homepage": "http://www.axelspringer.de"
+    },
+    {
+      "name": "Mathias Witt",
+      "homepage": "http://www.axelspringer.de"
     }
   ],
-  "homepage": "https://as-stash.axelspringer.de/projects/WPMUP/repos/s3-postmeta-patch",
-  "license": "proprietary",
+  "homepage": "https://github.com/axelspringer/wp-mu-s3-postmeta-patch",
+  "license": "Apache-2.0",
   "extra": {
-    "installer-name": "s3-postmeta-patch"
+    "installer-name": "wp-mu-s3-postmeta-patch"
   }
 }
